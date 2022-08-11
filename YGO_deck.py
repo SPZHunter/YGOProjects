@@ -26,7 +26,9 @@ import pandas as pd
 
 class YGO_Card(object):
     """
-    
+    Constructs itself from data on the internet (using scraper tool). Takes
+    a passcode for a card as an input, as well as an index for the card in
+    the Pandas data frame (which holds the data for all cards in the deck).
     """
     
     def __init__(self, **kw):
@@ -90,7 +92,14 @@ class YGO_Card(object):
     
 class YGO_Deck(object):
     """
+    Constructs itself from a .ydk deck list which contains a main, extra and
+    side decks. The cards in this deck list should be represented by their
+    respective passcodes.
     
+    The property "deckList" is a dictionary containing three Pandas data
+    frames; main, side and extra. Each index in the data frame
+    represents the data for a card, and each data point is an attribute of
+    it's respective card object.
     """
     
     def __init__(self, deckFilePath):
@@ -164,8 +173,8 @@ class YGO_Deck(object):
         # Get occurences of each passcode in each sub-deck
         for subDeck in self.__cardList:
             cardCountDict = Counter(self.__cardList[subDeck])
-            # Convert to deck list, each card a dictionary with card and count
-            n = 0 # Used for pd data frame index
+            # Convert to deck list
+            n = 0 # Used for pd data frame index, start at 0 and count up
             for passcode in cardCountDict:
                 card = YGO_Card(**{"passcode" : passcode, "n" : n})
                 count = cardCountDict[passcode]
@@ -193,4 +202,4 @@ class YGO_Deck(object):
             totals.append({subDeck : len(self.__cardList[subDeck])})
         return totals
         
-d1 = YGO_Deck(r"C:\ProjectIgnis\deck\Branded Dogmatika Despia -  v1.2.ydk")    
+d1 = YGO_Deck(r"test_deck.ydk")    
