@@ -17,13 +17,13 @@ Version:    0.1
 #       0.1        |   31/07/2022    |                                       #
 #----------------------------------------------------------------------------#
 """
-
+#--------Imports
 from collections import Counter
 from pathlib import Path
-import requests
 import numpy as np
 import pandas as pd
 
+#--------Card Object
 class YGO_Card(object):
     """
     Constructs itself from data on the internet (using scraper tool). Takes
@@ -89,7 +89,8 @@ class YGO_Card(object):
     @property
     def data(self):
         return self.__data
-    
+ 
+#--------Deck Object
 class YGO_Deck(object):
     """
     Constructs itself from a .ydk deck list which contains a main, extra and
