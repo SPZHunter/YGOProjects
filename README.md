@@ -29,6 +29,6 @@ Repository for Yu-Gi-Oh Projects
     conda env update --file local.yml --prune
     ```
 
-#### **Project List**Environment
+#### **Project List**
  - MiniDeckList
 

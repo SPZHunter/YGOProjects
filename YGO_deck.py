@@ -22,6 +22,9 @@ from collections import Counter
 from pathlib import Path
 import numpy as np
 import pandas as pd
+# Homemade
+from tools.YGO_Pro_Deck_Scraper import scraper
+from tools.config_reader import csv_to_dict
 
 #--------Card Object
 class YGO_Card(object):
@@ -31,60 +34,57 @@ class YGO_Card(object):
     the Pandas data frame (which holds the data for all cards in the deck).
     """
     
-    def __init__(self, **kw):
+    def __init__(self, passcode, **kw):
         
         # Read in card I.D from arguments dict, also known as passcode
-        self.__passcode = kw["passcode"]
+        self.__passcode = passcode
+        
+        # Selected browser to use
+        # default to chrome
+        if "browser" not in kw:
+            self.__browser = "Chrome"
+        else:
+            self.__browser = kw["browser"].title()
+            
+        # webdrivers directory. If not specified, default to a known path
+        if "webdriversDir" not in kw:
+            self.__webdriversDir = r"tools\webdrivers"
+        else:
+            self.__webdriversDir = kw["webdriversDir"]
+            
+        # API url for card info. using f-string
+        # default to ygoprodeck api
+        if "url" not in kw:
+            self.__url = "https://db.ygoprodeck.com/api/v7/cardinfo.php"
+        else:
+            self.__url = kw["url"]
+        # Add the passcode to the url
+        self.__url += f"?id={self.__passcode}"
         
         # Index for pd data frame
-        self.__n = kw["n"]
-        
+        if "n" not in kw:
+            self.__n = 0
+        else:
+            self.__n = kw["n"]
+            
         # Request the card data from YGOProdeck website
-        self.__data = self.__req_YGOPro(self.__passcode, self.__n)
+        self.__data = self.__req_YGOPro()
             
-    def __req_YGOPro(self, passcode, n):
+    def __req_YGOPro(self):
         """
-        
+        YGO pro website has an API which is avaliable for getting card info.        
         """
-        # Pass passcode to requests along with URL
+        # Data required to find the card. Used as inputs to scraper.
+        req_data = {"browser" : self.__browser,
+                    "webdriversDir" : self.__webdriversDir,
+                    "url" : self.__url
+                    }               
         
-    #     # Read in card name
-    #     name = #name data
+        # Create the scraper, which loads the html from the api on init
+        print("creating scraper")
+        s = scraper(**req_data)
+        print("Card: " + s.json["data"][0]["name"] + "\n")
         
-    #     # Read in main card type. this will be:
-    #     # Monster, Spell, Trap
-    #     cardType = {}
-    #     cardType["mainType"] = #Main type data
-                
-    #     # If a monster card
-    #     if "Monster" in cardType["mainType"].title():
-    #         # Store the attribute/sub-types
-    #         attribute = #attribute data e.g Dark
-            
-    #         cardType["subType1"] = #Sub-type 1 data e.g Machine, Wrym etc.
-    #         cardType["subType2"] = #Sub-type 2 data e.g Fusion XYZ etc.
-    #         cardType["subType3"] = #Sub-type 3 data e.g Normal, Effect
-            
-    #         attDef = #Att/def data
-    #     # Else if a spell or trap
-    #     else:
-    #         attribute = #Property data e.g quick-play    
-            
-    #     # Read in image data
-    #     imgData = #image data, maybe an image object/PIL object?
-            
-        d = {#"imgData" : imgData,
-    #         "name" : name,
-    #         "cardType" : cardType,
-    #         "attribute" : attribute,
-    #         "attDef" : attDef,
-              "passcode" : passcode
-              }
-        
-        d = pd.DataFrame(data=d, index=[n])
-        
-        return d
-    
     # Getter for cardData
     @property
     def data(self):
@@ -171,13 +171,14 @@ class YGO_Deck(object):
                     "side" : pd.DataFrame()
                     }
         
+        n = 0 # Index for pandas dataframe
         # Get occurences of each passcode in each sub-deck
         for subDeck in self.__cardList:
             cardCountDict = Counter(self.__cardList[subDeck])
+            
             # Convert to deck list
-            n = 0 # Used for pd data frame index, start at 0 and count up
             for passcode in cardCountDict:
-                card = YGO_Card(**{"passcode" : passcode, "n" : n})
+                card = YGO_Card(passcode=passcode, n=n)
                 count = cardCountDict[passcode]
                 
                 df = pd.DataFrame(card.data)
