@@ -14,7 +14,15 @@ Repository for Yu-Gi-Oh Projects
    it would be useful to have that data avaliable in future.
 
 #### **Project Environment**
- - YGOProjects.yml should be used for virtual environment creation. If adding to/changing the environment please remember to update the .yml. The prefix at the end of the .yml should be changed to where you wish to create your virtual environment on your system.
+ - YGOProjects.yml should be used for virtual environment creation. 
+ - If adding to/changing the environment please remember to update the .yml. 
+   ```
+   conda env export --no-builds | findstr -v "^prefix" > environemnt.yml
+   ```
+   or
+   ```
+   conda env export --no-builds | grep -v "^prefix" > environemnt.yml
+   ```
  - You can update your environment and remove unused dependencies with:
     ```
     conda activate myenv
